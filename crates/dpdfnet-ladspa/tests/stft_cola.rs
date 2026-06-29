@@ -18,7 +18,7 @@ fn analysis_then_synthesis_reconstructs_input() {
     let hops = total / HOP;
     for h in 0..hops {
         ana.push_hop(&input[h * HOP..(h + 1) * HOP], &mut spec);
-        syn.add_frame(&spec, &mut hop_out);          // pass-through spectrum
+        syn.add_frame(&spec, &mut hop_out); // pass-through spectrum
         out[h * HOP..(h + 1) * HOP].copy_from_slice(&hop_out);
     }
 

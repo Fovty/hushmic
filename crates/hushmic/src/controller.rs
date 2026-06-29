@@ -28,7 +28,11 @@ impl Paths {
         let dylib = std::env::var("ORT_DYLIB_PATH")
             .map(PathBuf::from)
             .unwrap_or_else(|_| PathBuf::from("/usr/lib/hushmic/libonnxruntime.so"));
-        Paths { plugin_so, model_dir, dylib }
+        Paths {
+            plugin_so,
+            model_dir,
+            dylib,
+        }
     }
 }
 
@@ -135,7 +139,12 @@ pub struct Controller {
 
 impl Controller {
     pub fn new(paths: Paths) -> Self {
-        Controller { paths, child: None, prior_default: None, set_default_active: false }
+        Controller {
+            paths,
+            child: None,
+            prior_default: None,
+            set_default_active: false,
+        }
     }
 
     /// True only if a spawned child is still alive (reaps it on exit).

@@ -68,7 +68,17 @@ fn main() {
         cmd_tx: ctx,
         status: TrayStatus::Off,
     };
-    let handle = tray.spawn().expect("spawn tray");
+    let handle = match tray.spawn() {
+        Ok(h) => h,
+        Err(e) => {
+            eprintln!(
+                "hushmic: could not register a system tray icon ({e}). On GNOME, install the \
+                 'AppIndicator and KStatusNotifierItem Support' extension; KDE and most other \
+                 desktops provide it out of the box."
+            );
+            std::process::exit(1);
+        }
+    };
 
     // bridge TrayCmd -> Event
     {

@@ -26,7 +26,12 @@ pub fn default_lock_path() -> PathBuf {
 /// for the whole process lifetime (dropping it releases the lock).
 /// `Ok(None)` — another instance already holds it.
 pub fn try_lock(path: &Path) -> std::io::Result<Option<File>> {
-    let file = OpenOptions::new().create(true).read(true).write(true).open(path)?;
+    let file = OpenOptions::new()
+        .create(true)
+        .read(true)
+        .write(true)
+        .truncate(false)
+        .open(path)?;
     // LOCK_NB: fail fast instead of blocking behind the running instance.
     let rc = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) };
     if rc == 0 {
@@ -55,11 +60,17 @@ mod tests {
         assert!(first.is_some(), "first lock should succeed");
 
         let second = try_lock(&path).expect("io ok");
-        assert!(second.is_none(), "second lock must be refused while the first is held");
+        assert!(
+            second.is_none(),
+            "second lock must be refused while the first is held"
+        );
 
         drop(first);
         let third = try_lock(&path).expect("io ok");
-        assert!(third.is_some(), "lock should be re-acquirable after release");
+        assert!(
+            third.is_some(),
+            "lock should be re-acquirable after release"
+        );
 
         drop(third);
         let _ = std::fs::remove_file(&path);

@@ -20,7 +20,9 @@ fn read_wav_mono_f32(p: &str) -> (Vec<f32>, u32) {
         hound::SampleFormat::Float => r.samples::<f32>().map(|x| x.unwrap()).collect(),
         hound::SampleFormat::Int => {
             let max = (1i64 << (spec.bits_per_sample - 1)) as f32;
-            r.samples::<i32>().map(|x| x.unwrap() as f32 / max).collect()
+            r.samples::<i32>()
+                .map(|x| x.unwrap() as f32 / max)
+                .collect()
         }
     };
     // Downmix to mono by taking the first channel (input is expected to be mono already).

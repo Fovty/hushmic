@@ -4,7 +4,11 @@ use std::path::PathBuf;
 
 #[test]
 fn conf_contains_required_fields() {
-    let cfg = Config { mic: Some("alsa_input.realmic".into()), attn_limit: 24.0, ..Config::default() };
+    let cfg = Config {
+        mic: Some("alsa_input.realmic".into()),
+        attn_limit: 24.0,
+        ..Config::default()
+    };
     let paths = Paths {
         plugin_so: PathBuf::from("/usr/lib/ladspa/libdpdfnet_ladspa.so"),
         model_dir: PathBuf::from("/usr/share/hushmic/models"),
@@ -12,10 +16,22 @@ fn conf_contains_required_fields() {
     };
     let c = render_conf(&cfg, &paths);
     assert!(c.contains("label  = \"dpdfnet_mono\""), "label missing");
-    assert!(c.contains("/usr/lib/ladspa/libdpdfnet_ladspa.so"), "plugin path missing");
-    assert!(c.contains("\"Attenuation Limit (dB)\" = 24"), "attn control missing");
-    assert!(c.contains("target.object  = \"alsa_input.realmic\""), "mic pin missing");
-    assert!(c.contains("media.class      = Audio/Source"), "not exposed as a source");
+    assert!(
+        c.contains("/usr/lib/ladspa/libdpdfnet_ladspa.so"),
+        "plugin path missing"
+    );
+    assert!(
+        c.contains("\"Attenuation Limit (dB)\" = 24"),
+        "attn control missing"
+    );
+    assert!(
+        c.contains("target.object  = \"alsa_input.realmic\""),
+        "mic pin missing"
+    );
+    assert!(
+        c.contains("media.class      = Audio/Source"),
+        "not exposed as a source"
+    );
     assert!(c.contains("audio.rate     = 48000"));
     assert!(c.contains("node.name        = \"hushmic_source\""));
 
@@ -33,12 +49,18 @@ fn conf_contains_required_fields() {
 fn conf_omits_target_when_no_mic() {
     // When no specific mic is chosen, there must be no target.object pin so the
     // filter-chain follows the system default capture device.
-    let cfg = Config { mic: None, ..Config::default() };
+    let cfg = Config {
+        mic: None,
+        ..Config::default()
+    };
     let paths = Paths {
         plugin_so: PathBuf::from("/usr/lib/ladspa/libdpdfnet_ladspa.so"),
         model_dir: PathBuf::from("/usr/share/hushmic/models"),
         dylib: PathBuf::from("/usr/lib/hushmic/libonnxruntime.so"),
     };
     let c = render_conf(&cfg, &paths);
-    assert!(!c.contains("target.object"), "target.object must be absent when no mic chosen");
+    assert!(
+        !c.contains("target.object"),
+        "target.object must be absent when no mic chosen"
+    );
 }

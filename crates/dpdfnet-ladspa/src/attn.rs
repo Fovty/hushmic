@@ -8,14 +8,19 @@ use std::collections::VecDeque;
 pub const NOISY_FRAME_OFFSET: usize = 4;
 
 pub struct AttnLimiter {
-    alpha: f32,            // residual noisy fraction; 0 = fully enhanced, 1 = fully noisy
+    alpha: f32, // residual noisy fraction; 0 = fully enhanced, 1 = fully noisy
     enabled: bool,
     ring: VecDeque<[f32; SPEC_LEN]>,
 }
 
 impl AttnLimiter {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
-        Self { alpha: 0.0, enabled: false, ring: VecDeque::with_capacity(NOISY_FRAME_OFFSET + 1) }
+        Self {
+            alpha: 0.0,
+            enabled: false,
+            ring: VecDeque::with_capacity(NOISY_FRAME_OFFSET + 1),
+        }
     }
 
     /// dB cap -> alpha = 10^(-dB/20). dB <= 0 disables suppression (alpha=1, pure noisy).
@@ -67,7 +72,9 @@ mod tests {
         let mut a = AttnLimiter::new();
         a.set_db(0.0); // alpha = 1.0 -> output equals the delayed noisy reference
         let mut noisy = [0f32; SPEC_LEN];
-        for (i, v) in noisy.iter_mut().enumerate() { *v = i as f32; }
+        for (i, v) in noisy.iter_mut().enumerate() {
+            *v = i as f32;
+        }
         // push NOISY_FRAME_OFFSET frames so the delay line is primed
         for _ in 0..NOISY_FRAME_OFFSET {
             let mut enh = [0f32; SPEC_LEN];
@@ -76,7 +83,10 @@ mod tests {
         let mut enh = [7f32; SPEC_LEN];
         a.apply(&noisy, &mut enh);
         // with alpha=1 and a constant noisy frame, output == noisy
-        assert!((enh[10] - noisy[10]).abs() < 1e-4, "0 dB must pass noisy through");
+        assert!(
+            (enh[10] - noisy[10]).abs() < 1e-4,
+            "0 dB must pass noisy through"
+        );
     }
 
     #[test]
@@ -92,7 +102,10 @@ mod tests {
         let mut enh = [3f32; SPEC_LEN];
         a.apply(&noisy, &mut enh);
         // blended = 1e-5*1000 + (1-1e-5)*3 ≈ 3.01; exercises the tiny-alpha blend
-        assert!((enh[10] - 3.01).abs() < 0.05, "100 dB must keep ~enhanced (tiny noisy floor)");
+        assert!(
+            (enh[10] - 3.01).abs() < 0.05,
+            "100 dB must keep ~enhanced (tiny noisy floor)"
+        );
     }
 
     #[test]
@@ -111,13 +124,20 @@ mod tests {
             last = enh;
             if t < NOISY_FRAME_OFFSET {
                 // not yet primed -> pure enhanced (no blend)
-                assert!((last[0] - 1000.0).abs() < 1e-3, "frame {t} should be unblended");
+                assert!(
+                    (last[0] - 1000.0).abs() < 1e-3,
+                    "frame {t} should be unblended"
+                );
             }
         }
         // On the last call (t = OFFSET+2), the delayed noisy is frame (t - OFFSET) = 2.
         let t = NOISY_FRAME_OFFSET + 2;
         let expected = alpha * ((t - NOISY_FRAME_OFFSET) as f32) + (1.0 - alpha) * 1000.0;
-        assert!((last[0] - expected).abs() < 0.05,
-            "delayed-blend misaligned: got {}, expected {}", last[0], expected);
+        assert!(
+            (last[0] - expected).abs() < 0.05,
+            "delayed-blend misaligned: got {}, expected {}",
+            last[0],
+            expected
+        );
     }
 }

@@ -1,3 +1,7 @@
+// ksni menu literals already set every field; the trailing `..Default::default()`
+// is kept intentionally as forward-compat across ksni versions.
+#![allow(clippy::needless_update)]
+
 use crate::config::Config;
 use crate::pipewire::Source;
 use ksni::menu::{CheckmarkItem, RadioGroup, RadioItem, StandardItem, SubMenu};

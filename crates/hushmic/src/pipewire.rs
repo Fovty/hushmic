@@ -128,7 +128,13 @@ pub fn set_default_source(node_name: &str) -> std::io::Result<()> {
 /// delete the key instead, returning PipeWire to "no configured default".
 pub fn clear_default_source() -> std::io::Result<()> {
     let st = Command::new("pw-metadata")
-        .args(["-n", "default", "-d", "0", "default.configured.audio.source"])
+        .args([
+            "-n",
+            "default",
+            "-d",
+            "0",
+            "default.configured.audio.source",
+        ])
         .status()?;
     if st.success() {
         Ok(())

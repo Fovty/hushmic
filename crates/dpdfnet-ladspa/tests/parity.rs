@@ -9,10 +9,16 @@ fn read_wav_mono_f32(p: &str) -> Vec<f32> {
         hound::SampleFormat::Float => r.samples::<f32>().map(|x| x.unwrap()).collect(),
         hound::SampleFormat::Int => {
             let max = (1i64 << (spec.bits_per_sample - 1)) as f32;
-            r.samples::<i32>().map(|x| x.unwrap() as f32 / max).collect()
+            r.samples::<i32>()
+                .map(|x| x.unwrap() as f32 / max)
+                .collect()
         }
     };
-    if spec.channels == 1 { s } else { s.iter().step_by(spec.channels as usize).copied().collect() }
+    if spec.channels == 1 {
+        s
+    } else {
+        s.iter().step_by(spec.channels as usize).copied().collect()
+    }
 }
 
 fn pearson(a: &[f32], b: &[f32]) -> f32 {
@@ -20,20 +26,37 @@ fn pearson(a: &[f32], b: &[f32]) -> f32 {
     let (a, b) = (&a[..n], &b[..n]);
     let ma = a.iter().sum::<f32>() / n as f32;
     let mb = b.iter().sum::<f32>() / n as f32;
-    let mut num = 0f64; let mut da = 0f64; let mut db = 0f64;
+    let mut num = 0f64;
+    let mut da = 0f64;
+    let mut db = 0f64;
     for i in 0..n {
         let (x, y) = ((a[i] - ma) as f64, (b[i] - mb) as f64);
-        num += x * y; da += x * x; db += y * y;
+        num += x * y;
+        da += x * x;
+        db += y * y;
     }
     (num / (da.sqrt() * db.sqrt())) as f32
 }
 
 #[test]
 fn matches_golden_reference() {
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).parent().unwrap().parent().unwrap().to_path_buf();
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
     let model = root.join("assets/models/dpdfnet8_48khz_hr.onnx");
-    let noisy = read_wav_mono_f32(root.join("tests/fixtures/noisy_fan_48k.wav").to_str().unwrap());
-    let golden = read_wav_mono_f32(root.join("tests/fixtures/golden_fan_dpdfnet8.wav").to_str().unwrap());
+    let noisy = read_wav_mono_f32(
+        root.join("tests/fixtures/noisy_fan_48k.wav")
+            .to_str()
+            .unwrap(),
+    );
+    let golden = read_wav_mono_f32(
+        root.join("tests/fixtures/golden_fan_dpdfnet8.wav")
+            .to_str()
+            .unwrap(),
+    );
 
     let mut eng = Engine::new(&model).expect("engine");
     let mut out = Vec::with_capacity(noisy.len());
@@ -55,5 +78,8 @@ fn matches_golden_reference() {
     let latency = HOP; // causal STFT center-pad vs the offline (trimmed) golden
     let corr = pearson(&out[skip + latency..], &golden[skip..]);
     eprintln!("parity correlation vs golden: {corr}");
-    assert!(corr > 0.99, "engine output correlation vs golden too low: {corr}");
+    assert!(
+        corr > 0.99,
+        "engine output correlation vs golden too low: {corr}"
+    );
 }

@@ -40,7 +40,11 @@ X-GNOME-Autostart-enabled=true
 }
 
 pub fn desktop_path() -> PathBuf {
-    BaseDirs::new().expect("home").config_dir().join("autostart").join("hushmic.desktop")
+    BaseDirs::new()
+        .expect("home")
+        .config_dir()
+        .join("autostart")
+        .join("hushmic.desktop")
 }
 
 pub fn is_autostart_enabled() -> bool {
@@ -68,7 +72,10 @@ mod tests {
     #[test]
     fn desktop_path_is_in_autostart() {
         let p = desktop_path();
-        assert!(p.ends_with("autostart/hushmic.desktop"), "unexpected path: {p:?}");
+        assert!(
+            p.ends_with("autostart/hushmic.desktop"),
+            "unexpected path: {p:?}"
+        );
     }
 
     #[test]

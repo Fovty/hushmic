@@ -96,5 +96,8 @@ fn empty_or_garbage_pwdump_is_safe() {
 fn extracts_metadata_name() {
     let out = r#"Found "default" metadata
 update: id:0 key:'default.configured.audio.source' value:'{"name":"alsa_input.usb-RODE"}' type:'Spa:String:JSON'"#;
-    assert_eq!(parse_metadata_value(out).as_deref(), Some("alsa_input.usb-RODE"));
+    assert_eq!(
+        parse_metadata_value(out).as_deref(),
+        Some("alsa_input.usb-RODE")
+    );
 }

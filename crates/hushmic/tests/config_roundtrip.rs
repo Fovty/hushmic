@@ -10,7 +10,14 @@ fn defaults_are_sane() {
 
 #[test]
 fn toml_roundtrips() {
-    let c = Config { enabled: false, mic: Some("alsa_input.x".into()), model: "dpdfnet2_48khz_hr".into(), attn_limit: 24.0, set_default: true, autostart: true };
+    let c = Config {
+        enabled: false,
+        mic: Some("alsa_input.x".into()),
+        model: "dpdfnet2_48khz_hr".into(),
+        attn_limit: 24.0,
+        set_default: true,
+        autostart: true,
+    };
     let s = toml::to_string_pretty(&c).unwrap();
     let back: Config = toml::from_str(&s).unwrap();
     assert_eq!(back.mic.as_deref(), Some("alsa_input.x"));

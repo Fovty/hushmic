@@ -43,9 +43,18 @@ impl Engine {
         self.attn.set_db(db);
     }
 
-    pub fn process_hop(&mut self, in_hop: &[f32; HOP], out_hop: &mut [f32; HOP]) -> Result<(), String> {
+    pub fn process_hop(
+        &mut self,
+        in_hop: &[f32; HOP],
+        out_hop: &mut [f32; HOP],
+    ) -> Result<(), String> {
         self.analysis.push_hop(in_hop, &mut self.spec);
-        self.model.run(&self.spec, &self.state, &mut self.spec_e, &mut self.state_out)?;
+        self.model.run(
+            &self.spec,
+            &self.state,
+            &mut self.spec_e,
+            &mut self.state_out,
+        )?;
         std::mem::swap(&mut self.state, &mut self.state_out);
         self.attn.apply(&self.spec, &mut self.spec_e); // blend noisy floor per dB cap
         self.synthesis.add_frame(&self.spec_e, out_hop);

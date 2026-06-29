@@ -1,26 +1,28 @@
 //! hushmic DPDFNet LADSPA plugin (v0.1).
-pub mod stft;
-pub mod model;
 pub mod attn;
 pub mod engine;
+pub mod model;
+pub mod stft;
 
 use engine::Engine;
 use ladspa::{DefaultValue, Plugin, PluginDescriptor, Port, PortConnection, PortDescriptor};
-use stft::HOP;
 use std::path::PathBuf;
+use stft::HOP;
 
 const LABEL: &str = "dpdfnet_mono";
 const UNIQUE_ID: u64 = 0x68736D31; // "hsm1"
 const DEFAULT_MODEL: &str = env!("HUSHMIC_DEFAULT_MODEL");
 
 fn model_path() -> PathBuf {
-    std::env::var("HUSHMIC_MODEL_PATH").map(PathBuf::from).unwrap_or_else(|_| PathBuf::from(DEFAULT_MODEL))
+    std::env::var("HUSHMIC_MODEL_PATH")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from(DEFAULT_MODEL))
 }
 
 struct DpdfnetPlugin {
     engine: Option<Engine>,
     in_buf: Vec<f32>,
-    out_buf: Vec<f32>,   // committed enhanced samples waiting to be emitted
+    out_buf: Vec<f32>, // committed enhanced samples waiting to be emitted
     last_db: f32,
 }
 
@@ -28,7 +30,10 @@ impl DpdfnetPlugin {
     fn new() -> Self {
         let engine = match Engine::new(&model_path()) {
             Ok(e) => Some(e),
-            Err(e) => { eprintln!("[dpdfnet-ladspa] engine init failed: {e}"); None }
+            Err(e) => {
+                eprintln!("[dpdfnet-ladspa] engine init failed: {e}");
+                None
+            }
         };
         DpdfnetPlugin {
             engine,
@@ -42,7 +47,9 @@ impl DpdfnetPlugin {
 impl Plugin for DpdfnetPlugin {
     fn activate(&mut self) {
         // Reset recurrent state + buffers so no stale state bleeds across sessions.
-        if let Some(e) = self.engine.as_mut() { e.reset(); }
+        if let Some(e) = self.engine.as_mut() {
+            e.reset();
+        }
         self.in_buf.clear();
         self.out_buf.clear();
         // pre-fill one hop of silence => one-hop output latency, absorbs the first frame.
@@ -57,7 +64,12 @@ impl Plugin for DpdfnetPlugin {
 
         let engine = match self.engine.as_mut() {
             Some(e) => e,
-            None => { for o in output.iter_mut() { *o = 0.0; } return; } // passthrough-silence on failure
+            None => {
+                for o in output.iter_mut() {
+                    *o = 0.0;
+                }
+                return;
+            } // passthrough-silence on failure
         };
         if db != self.last_db {
             engine.set_attn_db(db);
@@ -81,7 +93,9 @@ impl Plugin for DpdfnetPlugin {
         // 3. emit sample_count from the output queue (zero-fill if underfilled)
         let avail = self.out_buf.len().min(sample_count);
         output[..avail].copy_from_slice(&self.out_buf[..avail]);
-        for o in output[avail..sample_count].iter_mut() { *o = 0.0; }
+        for o in output[avail..sample_count].iter_mut() {
+            *o = 0.0;
+        }
         self.out_buf.drain(..avail);
     }
 }
@@ -103,8 +117,22 @@ pub fn get_ladspa_descriptor(index: u64) -> Option<PluginDescriptor> {
         maker: "hushmic",
         copyright: "MIT OR Apache-2.0",
         ports: vec![
-            Port { name: "Input", desc: PortDescriptor::AudioInput, hint: None, default: None, lower_bound: None, upper_bound: None },
-            Port { name: "Output", desc: PortDescriptor::AudioOutput, hint: None, default: None, lower_bound: None, upper_bound: None },
+            Port {
+                name: "Input",
+                desc: PortDescriptor::AudioInput,
+                hint: None,
+                default: None,
+                lower_bound: None,
+                upper_bound: None,
+            },
+            Port {
+                name: "Output",
+                desc: PortDescriptor::AudioOutput,
+                hint: None,
+                default: None,
+                lower_bound: None,
+                upper_bound: None,
+            },
             Port {
                 name: "Attenuation Limit (dB)",
                 desc: PortDescriptor::ControlInput,

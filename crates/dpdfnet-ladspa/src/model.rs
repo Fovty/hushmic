@@ -37,7 +37,9 @@ pub struct Model {
 }
 
 fn parse_csv_f32(s: &str) -> Vec<f32> {
-    s.split(',').filter_map(|t| t.trim().parse::<f32>().ok()).collect()
+    s.split(',')
+        .filter_map(|t| t.trim().parse::<f32>().ok())
+        .collect()
 }
 
 impl Model {
@@ -77,10 +79,22 @@ impl Model {
             .ok_or("could not determine state_size from metadata or input shape")?;
 
         // Seed init_state from custom metadata (erb_norm_init then spec_norm_init).
-        let erb_sz: usize = meta.custom("erb_norm_state_size").and_then(|s| s.trim().parse().ok()).unwrap_or(481);
-        let spec_sz: usize = meta.custom("spec_norm_state_size").and_then(|s| s.trim().parse().ok()).unwrap_or(96);
-        let erb_init = meta.custom("erb_norm_init").map(|s| parse_csv_f32(&s)).unwrap_or_default();
-        let spec_init = meta.custom("spec_norm_init").map(|s| parse_csv_f32(&s)).unwrap_or_default();
+        let erb_sz: usize = meta
+            .custom("erb_norm_state_size")
+            .and_then(|s| s.trim().parse().ok())
+            .unwrap_or(481);
+        let spec_sz: usize = meta
+            .custom("spec_norm_state_size")
+            .and_then(|s| s.trim().parse().ok())
+            .unwrap_or(96);
+        let erb_init = meta
+            .custom("erb_norm_init")
+            .map(|s| parse_csv_f32(&s))
+            .unwrap_or_default();
+        let spec_init = meta
+            .custom("spec_norm_init")
+            .map(|s| parse_csv_f32(&s))
+            .unwrap_or_default();
         // `ModelMetadata` borrows `session` and has a Drop impl; release it before moving `session`.
         drop(meta);
 
@@ -92,7 +106,11 @@ impl Model {
             init_state[erb_sz..erb_sz + spec_sz].copy_from_slice(&spec_init);
         }
 
-        Ok(Model { session, state_size, init_state })
+        Ok(Model {
+            session,
+            state_size,
+            init_state,
+        })
     }
 
     pub fn run(
@@ -104,16 +122,27 @@ impl Model {
     ) -> Result<(), String> {
         let spec_t = TensorRef::from_array_view(([1usize, 1, FREQ_BINS, 2], spec.as_slice()))
             .map_err(|e| e.to_string())?;
-        let state_t = TensorRef::from_array_view(([state_in.len()], state_in))
-            .map_err(|e| e.to_string())?;
+        let state_t =
+            TensorRef::from_array_view(([state_in.len()], state_in)).map_err(|e| e.to_string())?;
         let outputs = self
             .session
             .run(ort::inputs! { "spec" => spec_t, "state_in" => state_t })
             .map_err(|e| e.to_string())?;
 
-        let (_, e_slice) = outputs["spec_e"].try_extract_tensor::<f32>().map_err(|e| e.to_string())?;
+        let (_, e_slice) = outputs["spec_e"]
+            .try_extract_tensor::<f32>()
+            .map_err(|e| e.to_string())?;
+        if e_slice.len() != spec_e.len() {
+            return Err(format!(
+                "model output 'spec_e' has {} elements, expected {}",
+                e_slice.len(),
+                spec_e.len()
+            ));
+        }
         spec_e.copy_from_slice(e_slice);
-        let (_, s_slice) = outputs["state_out"].try_extract_tensor::<f32>().map_err(|e| e.to_string())?;
+        let (_, s_slice) = outputs["state_out"]
+            .try_extract_tensor::<f32>()
+            .map_err(|e| e.to_string())?;
         state_out.clear();
         state_out.extend_from_slice(s_slice);
         Ok(())
@@ -138,13 +167,17 @@ mod tests {
         assert_eq!(m.state_size, 90228, "unexpected state size");
         // init_state has exactly 577 nonzero leading elements
         let nonzero = m.init_state.iter().filter(|&&x| x != 0.0).count();
-        assert_eq!(nonzero, 577, "expected 577 metadata-seeded nonzero state elems");
+        assert_eq!(
+            nonzero, 577,
+            "expected 577 metadata-seeded nonzero state elems"
+        );
 
         let spec = [0f32; SPEC_LEN]; // zero (silence) frame is a valid input
         let mut spec_e = [0f32; SPEC_LEN];
         let mut state_out = vec![0f32; m.state_size];
         let state_in = m.init_state.clone();
-        m.run(&spec, &state_in, &mut spec_e, &mut state_out).expect("run");
+        m.run(&spec, &state_in, &mut spec_e, &mut state_out)
+            .expect("run");
         // running must mutate state (recurrent step happened)
         assert!(state_out != state_in, "state_out did not change after run");
         assert_eq!(state_out.len(), m.state_size);

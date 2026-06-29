@@ -1,4 +1,4 @@
-use rustfft::{num_complex::Complex32, FftPlanner, Fft};
+use rustfft::{num_complex::Complex32, Fft, FftPlanner};
 use std::sync::Arc;
 
 pub const N_FFT: usize = 960;
@@ -27,6 +27,7 @@ pub struct Analysis {
 }
 
 impl Analysis {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         let mut planner = FftPlanner::<f32>::new();
         Self {
@@ -68,6 +69,7 @@ pub struct Synthesis {
 }
 
 impl Synthesis {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         let mut planner = FftPlanner::<f32>::new();
         Self {
