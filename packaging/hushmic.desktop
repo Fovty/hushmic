@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Hushmic
+Comment=Real-time microphone noise suppression
+Exec=hushmic --tray
+Icon=hushmic
+Terminal=false
+Categories=AudioVideo;Audio;

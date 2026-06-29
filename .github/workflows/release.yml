@@ -1,0 +1,97 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            python3 python3-venv python3-pip curl ca-certificates
+
+      - name: Install cargo-deb
+        run: cargo install cargo-deb --locked || cargo install cargo-deb
+
+      - name: Build release artifacts
+        run: bash packaging/build-release.sh
+
+      - name: List artifacts
+        run: ls -lh dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/hushmic-x86_64.AppImage
+            dist/hushmic_0.1.0-1_amd64.deb
+            dist/hushmic-0.1.0-x86_64.tar.gz
+            dist/sha256sums.txt
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  aur:
+    name: Publish to AUR (disabled)
+    needs: release
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH for AUR
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<'EOF'
+          Host aur.archlinux.org
+            User aur
+            IdentityFile ~/.ssh/aur
+          EOF
+
+      - name: Clone AUR package repo
+        run: git clone ssh://aur@aur.archlinux.org/hushmic.git aur-repo
+
+      - name: Update PKGBUILD and .SRCINFO
+        run: |
+          cd aur-repo
+          VERSION="${GITHUB_REF_NAME#v}"
+          cp ../packaging/PKGBUILD PKGBUILD
+          sed -i "s/^pkgver=.*/pkgver=${VERSION}/" PKGBUILD
+          # makepkg --printsrcinfo > .SRCINFO   # run on an Arch container/runner
+          git config user.name "hushmic"
+          git config user.email "hushmic@users.noreply.github.com"
+          git add PKGBUILD .SRCINFO || git add PKGBUILD
+          git commit -m "Update to ${VERSION}"
+
+      - name: Push to AUR
+        run: |
+          cd aur-repo
+          git push origin master

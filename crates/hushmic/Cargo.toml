@@ -1,0 +1,52 @@
+[package]
+name = "hushmic"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Real-time microphone noise suppression as a system-wide virtual microphone (DPDFNet via PipeWire)."
+
+[[bin]]
+name = "hushmic"
+path = "src/main.rs"
+
+[dependencies]
+ksni = { version = "0.3", features = ["blocking"] }
+directories = "6"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "1"
+libc = "0.2"
+
+# .deb BUILD PROCEDURE (must match the AUR PKGBUILD's path-bake): the packaged
+# plugin .so bakes its compile-time default model/dylib paths from the build env,
+# so the release MUST be built with the INSTALL-layout paths set, THEN packaged
+# with --no-build (so cargo-deb reuses that release rather than rebuilding with
+# dev defaults):
+#
+#   HUSHMIC_BUILD_MODEL=/usr/share/hushmic/models/dpdfnet8_48khz_hr.onnx \
+#   HUSHMIC_BUILD_DYLIB=/usr/lib/hushmic/libonnxruntime.so \
+#   cargo build --release
+#   cargo deb -p hushmic --no-build
+#
+# Without the env, the .so would bake the build host's dev `assets/...` paths,
+# which are wrong for anyone loading the plugin standalone (e.g. EasyEffects) on
+# an installed system. Runtime env (HUSHMIC_MODEL_PATH/ORT_DYLIB_PATH) still wins.
+[package.metadata.deb]
+maintainer = "hushmic"
+copyright = "2026, hushmic, MIT OR Apache-2.0"
+license-file = ["../../LICENSE-MIT", "0"]
+extended-description = "Real-time microphone noise suppression as a system-wide virtual microphone (DPDFNet via PipeWire)."
+section = "sound"
+priority = "optional"
+depends = "$auto, pipewire, pipewire-bin, pipewire-pulse, wireplumber"
+assets = [
+  ["../../target/release/hushmic", "usr/bin/", "755"],
+  ["../../target/release/libdpdfnet_ladspa.so", "usr/lib/ladspa/", "644"],
+  ["../../assets/lib/libonnxruntime.so", "usr/lib/hushmic/", "644"],
+  ["../../assets/models/dpdfnet8_48khz_hr.onnx", "usr/share/hushmic/models/", "644"],
+  ["../../assets/models/dpdfnet2_48khz_hr.onnx", "usr/share/hushmic/models/", "644"],
+  ["../../packaging/hushmic.desktop", "usr/share/applications/", "644"],
+  ["../../packaging/hushmic-256.png", "usr/share/icons/hicolor/256x256/apps/hushmic.png", "644"],
+  ["../../LICENSE-MIT", "usr/share/doc/hushmic/", "644"],
+  ["../../LICENSE-APACHE", "usr/share/doc/hushmic/", "644"],
+]

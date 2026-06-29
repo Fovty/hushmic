@@ -1,0 +1,16 @@
+[package]
+name = "dpdfnet-ladspa"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]   # cdylib for the LADSPA .so; rlib so tests can link the engine
+
+[dependencies]
+ladspa = "0.3.4"
+rustfft = "6"
+ort = { version = "=2.0.0-rc.12", default-features = false, features = ["std", "ndarray", "load-dynamic", "api-18"] }
+
+[dev-dependencies]
+hound = "3.5"

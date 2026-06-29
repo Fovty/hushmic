@@ -1,0 +1,18 @@
+# Rust build artifacts
+/target
+**/target
+
+# Bundled binary assets — provisioned locally via scripts/setup-assets.sh, not tracked in git
+/assets/models/*.onnx
+/assets/lib/*.so*
+/tests/fixtures/*.wav
+
+# Release build outputs + provisioning scratch
+/dist
+/.venv-assets
+/.build-tools
+
+# Editor / OS cruft
+*.swp
+*~
+.DS_Store

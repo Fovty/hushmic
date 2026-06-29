@@ -1,0 +1,36 @@
+# Maintainer: hushmic
+pkgname=hushmic
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Real-time microphone noise suppression as a virtual mic (DPDFNet via PipeWire)"
+arch=('x86_64')
+url="https://github.com/Fovty/hushmic"
+license=('MIT' 'Apache')
+depends=('pipewire' 'pipewire-pulse' 'wireplumber' 'onnxruntime')
+makedepends=('rust' 'cargo')
+source=("$pkgname-$pkgver.tar.gz")  # or git source
+sha256sums=('SKIP')
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  # Bake the install-layout paths into the plugin. On Arch we depend on the
+  # system onnxruntime package; confirm its dylib path with
+  #   pacman -Ql onnxruntime | grep libonnxruntime.so
+  # (typically /usr/lib/libonnxruntime.so). If that package is < 1.24, bundle
+  # our own .so under /usr/lib/hushmic/ instead (as the .deb does) and point
+  # HUSHMIC_BUILD_DYLIB there.
+  export HUSHMIC_BUILD_MODEL=/usr/share/hushmic/models/dpdfnet8_48khz_hr.onnx
+  export HUSHMIC_BUILD_DYLIB=/usr/lib/libonnxruntime.so
+  cargo build --release --frozen
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+  install -Dm755 target/release/hushmic "$pkgdir/usr/bin/hushmic"
+  install -Dm644 target/release/libdpdfnet_ladspa.so "$pkgdir/usr/lib/ladspa/libdpdfnet_ladspa.so"
+  install -Dm644 assets/models/dpdfnet8_48khz_hr.onnx "$pkgdir/usr/share/hushmic/models/dpdfnet8_48khz_hr.onnx"
+  install -Dm644 assets/models/dpdfnet2_48khz_hr.onnx "$pkgdir/usr/share/hushmic/models/dpdfnet2_48khz_hr.onnx"
+  install -Dm644 packaging/hushmic.desktop "$pkgdir/usr/share/applications/hushmic.desktop"
+  install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/hushmic/LICENSE-MIT"
+  install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/hushmic/LICENSE-APACHE"
+}
