@@ -1,6 +1,6 @@
 <h1 align="center">
-  <img src="docs/img/hushmic-logo.png" alt="Hushmic" width="120"><br>
-  Hushmic
+  <img src="docs/img/hushmic-logo.png" alt="HushMic" width="120"><br>
+  HushMic
 </h1>
 
 <p align="center">
@@ -14,12 +14,12 @@
   <a href="https://github.com/Fovty/hushmic/actions/workflows/release.yml"><img src="https://github.com/Fovty/hushmic/actions/workflows/release.yml/badge.svg" alt="Build"></a>
 </p>
 
-Hushmic creates a virtual microphone that strips out keyboard clatter, fans, and background chatter in real time. Select **"Hushmic Microphone"** as your input in any app — Discord, TeamSpeak, browsers, OBS, games — and that's it. No EasyEffects graphs to wire up, no terminal, no `setcap`.
+HushMic creates a virtual microphone that strips out keyboard clatter, fans, and background chatter in real time. Select **"HushMic Microphone"** as your input in any app — Discord, TeamSpeak, browsers, OBS, games — and that's it. No EasyEffects graphs to wire up, no terminal, no `setcap`.
 
 
 ## Demo
 
-Each clip plays the **noisy input**, then the same audio **cleaned by Hushmic** — a neutral public-domain voice over real background noise.
+Each clip plays the **noisy input**, then the same audio **cleaned by HushMic** — a neutral public-domain voice over real background noise.
 
 <table>
 <tr>
@@ -44,11 +44,11 @@ So I benchmarked the realistic contenders on my own recordings, picked the one t
 
 ### How it compares
 
-A small bake-off on my own recordings — 7 noise scenarios (keyboard, fan, AC, chatter, …), scored with **DNSMOS P.835** (a reference-free MOS estimator). These are indicative numbers from one person's setup, not a formal benchmark, but they're why Hushmic uses DPDFNet:
+A small bake-off on my own recordings — 7 noise scenarios (keyboard, fan, AC, chatter, …), scored with **DNSMOS P.835** (a reference-free MOS estimator). These are indicative numbers from one person's setup, not a formal benchmark, but they're why HushMic uses DPDFNet:
 
 | Model                           | Overall (OVRL) | Background (BAK) | Speech (SIG) |
 | ------------------------------- | :------------: | :--------------: | :----------: |
-| **DPDFNet** — _Hushmic's model_ |    **3.04**    |     **4.11**     |   **3.32**   |
+| **DPDFNet** — _HushMic's model_ |    **3.04**    |     **4.11**     |   **3.32**   |
 | DeepFilterNet 3                 |      3.01      |       4.07       |     3.30     |
 | GTCRN                           |      2.73      |       3.93       |     3.08     |
 | Krisp _(v9.9.3)_                |      2.71      |       4.01       |     3.00     |
@@ -81,8 +81,8 @@ curl -fsSL https://raw.githubusercontent.com/Fovty/hushmic/main/scripts/install.
 **Debian / Ubuntu** (`.deb`):
 
 ```bash
-curl -fsSLO https://github.com/Fovty/hushmic/releases/latest/download/hushmic_0.1.0-1_amd64.deb
-sudo apt install ./hushmic_0.1.0-1_amd64.deb
+curl -fsSLO https://github.com/Fovty/hushmic/releases/latest/download/hushmic_0.1.1-1_amd64.deb
+sudo apt install ./hushmic_0.1.1-1_amd64.deb
 ```
 
 **AppImage** (any distro, no install):
@@ -95,13 +95,13 @@ chmod +x hushmic-x86_64.AppImage
 
 ## Usage
 
-Launch Hushmic from your desktop's application menu, or from a terminal:
+Launch HushMic from your desktop's application menu, or from a terminal:
 
 ```bash
 hushmic --tray
 ```
 
-A tray icon appears. Open it, **Enable**, pick your **Microphone**, and choose **"Hushmic Microphone"** as the input in your app. Or flip **Set as default microphone** and everything that respects the system default uses it automatically. The same menu has the model picker (`dpdfnet8` = quality, `dpdfnet2` = lighter), suppression strength, and a start-on-login toggle.
+A tray icon appears. Open it, **Enable**, pick your **Microphone**, and choose **"HushMic Microphone"** as the input in your app. Or flip **Set as default microphone** and everything that respects the system default uses it automatically. The same menu has the model picker (`dpdfnet8` = quality, `dpdfnet2` = lighter), suppression strength, and a start-on-login toggle.
 
 <p align="center">
   <img src="docs/img/hushmic-menu-main.png" alt="Main menu" width="270">
@@ -143,18 +143,18 @@ autostart   = false                        # launch on login
 
 **Does it survive sleep / a PipeWire restart?** Yes — a watchdog re-creates the virtual mic automatically.
 
-**TeamSpeak / Discord don't see it?** Make sure `pipewire-pulse` is running; Hushmic exposes the mic through it so PulseAudio/ALSA-compat apps can pick it.
+**TeamSpeak / Discord don't see it?** Make sure `pipewire-pulse` is running; HushMic exposes the mic through it so PulseAudio/ALSA-compat apps can pick it.
 
-**Recording still sounds noisy / unprocessed?** A few apps that use the **Qt Multimedia** backend (some KDE recorders, etc.) capture the hardware device directly and ignore the selected virtual mic. Switch the app to its **PulseAudio/PipeWire** backend, or enable _Set as default microphone_ in the tray so default-following apps pick Hushmic.
+**Recording still sounds noisy / unprocessed?** A few apps that use the **Qt Multimedia** backend (some KDE recorders, etc.) capture the hardware device directly and ignore the selected virtual mic. Switch the app to its **PulseAudio/PipeWire** backend, or enable _Set as default microphone_ in the tray so default-following apps pick HushMic.
 
 ## Alternatives
 
-If Hushmic isn't your thing, these are the other good Linux options:
+If HushMic isn't your thing, these are the other good Linux options:
 
 - **[NoiseTorch-ng](https://github.com/noisetorch/NoiseTorch)** — popular, RNNoise-based virtual mic. Simpler model; needs `setcap`.
 - **[EasyEffects](https://github.com/wwmm/easyeffects)** — a full PipeWire effects suite (includes RNNoise denoise). More to configure.
 - **[noise-suppression-for-voice](https://github.com/werman/noise-suppression-for-voice)** — RNNoise LADSPA/VST plugin; manual wiring.
-- **[DeepFilterNet](https://github.com/Rikorose/DeepFilterNet)** — the model lineage Hushmic builds on; ships its own LADSPA plugin you can wire up by hand.
+- **[DeepFilterNet](https://github.com/Rikorose/DeepFilterNet)** — the model lineage HushMic builds on; ships its own LADSPA plugin you can wire up by hand.
 
 ## Build from source
 

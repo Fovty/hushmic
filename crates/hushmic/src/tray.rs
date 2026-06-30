@@ -42,7 +42,7 @@ impl TrayStatus {
     }
 }
 
-pub struct HushmicTray {
+pub struct HushMicTray {
     pub cfg: Config,
     pub mics: Vec<Source>,
     pub cmd_tx: Sender<TrayCmd>,
@@ -60,12 +60,12 @@ const ATTN_PRESETS: &[(f32, &str)] = &[
     (6.0, "Light (6 dB)"),
 ];
 
-impl Tray for HushmicTray {
+impl Tray for HushMicTray {
     fn id(&self) -> String {
         "hushmic".into()
     }
     fn title(&self) -> String {
-        format!("Hushmic{}", self.status.title_suffix())
+        format!("HushMic{}", self.status.title_suffix())
     }
     fn icon_name(&self) -> String {
         self.status.icon_name().into()
@@ -227,7 +227,7 @@ mod tests {
     #[test]
     fn menu_builds_non_empty() {
         let (tx, _rx) = std::sync::mpsc::channel();
-        let tray = HushmicTray {
+        let tray = HushMicTray {
             cfg: Config::default(),
             mics: vec![Source {
                 name: "alsa_input.test".into(),

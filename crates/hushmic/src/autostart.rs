@@ -27,7 +27,7 @@ pub fn desktop_contents() -> String {
     format!(
         "[Desktop Entry]
 Type=Application
-Name=Hushmic
+Name=HushMic
 Comment=Real-time microphone noise suppression
 Exec={exec}
 Icon=hushmic
@@ -87,8 +87,8 @@ mod tests {
     #[test]
     fn appimage_exec_points_at_the_appimage_file() {
         assert_eq!(
-            exec_field_for(Some("/home/u/Apps/Hushmic.AppImage")),
-            "\"/home/u/Apps/Hushmic.AppImage\" --tray"
+            exec_field_for(Some("/home/u/Apps/HushMic.AppImage")),
+            "\"/home/u/Apps/HushMic.AppImage\" --tray"
         );
     }
 
@@ -96,7 +96,7 @@ mod tests {
     fn contents_are_a_valid_desktop_entry() {
         let c = desktop_contents();
         assert!(c.contains("Type=Application"));
-        assert!(c.contains("Name=Hushmic"));
+        assert!(c.contains("Name=HushMic"));
         assert!(c.contains("--tray"));
     }
 }

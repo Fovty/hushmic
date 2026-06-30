@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Hushmic
+Name=HushMic
 Comment=Real-time microphone noise suppression
 Exec=hushmic --tray
 Icon=hushmic

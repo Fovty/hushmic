@@ -1,7 +1,7 @@
 use hushmic::config::Config;
 use hushmic::controller::{Controller, Paths};
 use hushmic::pipewire;
-use hushmic::tray::{HushmicTray, TrayCmd, TrayStatus};
+use hushmic::tray::{HushMicTray, TrayCmd, TrayStatus};
 use hushmic::{autostart, lock, watchdog};
 use ksni::blocking::TrayMethods;
 use std::sync::mpsc;
@@ -62,7 +62,7 @@ fn main() {
 
     // Tray -> commands
     let (ctx, crx) = mpsc::channel::<TrayCmd>();
-    let tray = HushmicTray {
+    let tray = HushMicTray {
         cfg: cfg.clone(),
         mics: pipewire::list_real_sources(),
         cmd_tx: ctx,
@@ -171,7 +171,7 @@ fn main() {
                 let status = compute_status(&cfg, &mut controller);
                 let new_mics = pipewire::list_real_sources();
                 let snapshot = cfg.clone();
-                let _ = handle.update(move |t: &mut HushmicTray| {
+                let _ = handle.update(move |t: &mut HushMicTray| {
                     t.cfg = snapshot;
                     t.mics = new_mics;
                     t.status = status;
@@ -216,7 +216,7 @@ fn main() {
                 }
                 // reflect liveness in the tray status (icon + title) every tick
                 let status = compute_status(&cfg, &mut controller);
-                let _ = handle.update(move |t: &mut HushmicTray| {
+                let _ = handle.update(move |t: &mut HushMicTray| {
                     t.status = status;
                 });
             }
