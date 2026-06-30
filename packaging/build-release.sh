@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Build all hushmic v0.1.1 release artifacts into dist/:
-#   * hushmic-0.1.1-x86_64.tar.gz   (portable tarball + install.sh)
-#   * hushmic_0.1.1-1_amd64.deb     (Debian/Ubuntu package)
+# Build all hushmic v0.1.2 release artifacts into dist/:
+#   * hushmic-0.1.2-x86_64.tar.gz   (portable tarball + install.sh)
+#   * hushmic_0.1.2-1_amd64.deb     (Debian/Ubuntu package)
 #   * hushmic-x86_64.AppImage       (self-contained AppImage)
 #   * sha256sums.txt                (checksums over the above)
 #

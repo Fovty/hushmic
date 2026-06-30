@@ -14,7 +14,7 @@
   <a href="https://github.com/Fovty/hushmic/actions/workflows/release.yml"><img src="https://github.com/Fovty/hushmic/actions/workflows/release.yml/badge.svg" alt="Build"></a>
 </p>
 
-HushMic creates a virtual microphone that strips out keyboard clatter, fans, and background chatter in real time. Select **"HushMic Microphone"** as your input in any app — Discord, TeamSpeak, browsers, OBS, games — and that's it. No EasyEffects graphs to wire up, no terminal, no `setcap`.
+HushMic creates a virtual microphone that strips out keyboard clatter, fans, and background chatter in real time. Select **"HushMic"** as your input in any app — Discord, TeamSpeak, browsers, OBS, games — and that's it. No EasyEffects graphs to wire up, no terminal, no `setcap`.
 
 
 ## Demo
@@ -81,8 +81,8 @@ curl -fsSL https://raw.githubusercontent.com/Fovty/hushmic/main/scripts/install.
 **Debian / Ubuntu** (`.deb`):
 
 ```bash
-curl -fsSLO https://github.com/Fovty/hushmic/releases/latest/download/hushmic_0.1.1-1_amd64.deb
-sudo apt install ./hushmic_0.1.1-1_amd64.deb
+curl -fsSLO https://github.com/Fovty/hushmic/releases/latest/download/hushmic_0.1.2-1_amd64.deb
+sudo apt install ./hushmic_0.1.2-1_amd64.deb
 ```
 
 **AppImage** (any distro, no install):
@@ -101,7 +101,7 @@ Launch HushMic from your desktop's application menu, or from a terminal:
 hushmic --tray
 ```
 
-A tray icon appears. Open it, **Enable**, pick your **Microphone**, and choose **"HushMic Microphone"** as the input in your app. Or flip **Set as default microphone** and everything that respects the system default uses it automatically. The same menu has the model picker (`dpdfnet8` = quality, `dpdfnet2` = lighter), suppression strength, and a start-on-login toggle.
+A tray icon appears. Open it, **Enable**, pick your **Microphone**, and choose **"HushMic"** as the input in your app. Or flip **Set as default microphone** and everything that respects the system default uses it automatically. The same menu has the model picker (`dpdfnet8` = quality, `dpdfnet2` = lighter), suppression strength, and a start-on-login toggle.
 
 <p align="center">
   <img src="docs/img/hushmic-menu-main.png" alt="Main menu" width="270">
